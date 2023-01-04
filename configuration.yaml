@@ -1,0 +1,80 @@
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+cloud:
+# Text to speech
+tts:
+  - platform: google_translate
+  
+#http:
+#  ssl_certificate: /ssl/fullchain.pem
+#  ssl_key: /ssl/privkey.pem 
+
+recorder:
+ purge_keep_days: 40
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+switch: !include switch.yaml
+sensor: !include sensor.yaml
+knx: !include knx.yaml
+input_number: !include input_number.yaml
+
+frontend:
+  themes: !include_dir_merge_named themes
+  extra_module_url:
+    - /hacsfiles/lovelace-card-mod/card-mod.js
+    - /hacsfiles/hass-hue-icons/hass-hue-icons.js
+
+sonoff:
+  username: !secret gmail_address
+  password: !secret sonoff_password
+  force_update: [power]
+  scan_interval: '00:05:00'  # (optional) default 5 minutes
+  sensors: [temperature, humidity, power, current, voltage, consumption]
+
+# Go to https://idp2-apigw.cloud.grohe.com/v3/iot/oidc/login
+# Bring up developer tools
+# Log in, that'll try redirecting your browser with a 302 to an url starting with ondus://idp2-apigw.cloud.grohe.com/v3/iot/oidc/token, which an off-the-shelf Chrome will ignore
+# You should see this failed redirect in your developer tools. Copy out the full URL and replace ondus with https and visit that URL (will likely only work once, and will expire, so don't be too slow).
+# This gives you a json response. Save it and extract refresh_token from it (manually, or jq .refresh_token < file.json)
+# source: https://github.com/gkreitz/homeassistant-grohe_sense
+grohe_sense:
+  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI2ODU2M2VlMy1kZDE1LTQyNGUtYjQ1NC1iOGVkODgxZTI1YmYifQ.eyJleHAiOjE2ODYzODU1MzUsImlhdCI6MTY3MDgzMzUzNSwianRpIjoiZGUzNzdmMDQtOTA1Ni00YjVlLTgzNWQtZmFiZDRkNWNlNTJjIiwiaXNzIjoiaHR0cHM6Ly9pZHAyLWFwaWd3LmNsb3VkLmdyb2hlLmNvbS92MS9zc28vYXV0aC9yZWFsbXMvaWRtLWFwaWd3IiwiYXVkIjoiaHR0cHM6Ly9pZHAyLWFwaWd3LmNsb3VkLmdyb2hlLmNvbS92MS9zc28vYXV0aC9yZWFsbXMvaWRtLWFwaWd3Iiwic3ViIjoiNGFlMTlkOGQtZGY5MC00ZTk1LTgxM2YtZTk5M2EwNDc5ZTM1IiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImlvdCIsInNlc3Npb25fc3RhdGUiOiI4NGQxYTVjYi04ZjIxLTQzZWMtYTQ0My0yMTg4NDhhODNhMDIiLCJzY29wZSI6Im9wZW5pZCBHcm9oZV9JRFAyIn0.gKVSoSsIeKErhBeJS5tXq1YJNe2fUSpFuUkxecHBAQ4"
+
+#
+#google_assistant:
+#  project_id: smart-home-6e5b0
+#  service_account: !include smart-home-6e5b0-8e41a99f53c5.json
+#  report_state: true
+#  exposed_domains:
+#    - switch
+#    - light
+#    - climate
+#    - cover
+
+midea_dehumidifier:
+  username: !secret gmail_address
+  password: !secret midea_password
+  
+camera:
+  - platform: xiaomi_cloud_map_extractor
+    host: !secret xiaomi_vacuum_host
+    token: !secret xiaomi_vacuum_token
+    username: !secret gmail_address
+    password: !secret xiaomi_cloud_password
+    map_transformation:
+     scale: 2
+    attributes:
+      - calibration_points
+    draw: ['all']
+    colors:
+      color_path: [255, 255, 255]
+      color_robo: [255, 255, 255]
+      
+utility_meter:
+  heating_usage:
+    source: sensor.heating_on_today
+    cycle: monthly

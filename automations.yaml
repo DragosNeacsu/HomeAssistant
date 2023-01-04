@@ -1,0 +1,569 @@
+- id: '1641674586944'
+  alias: Lock door
+  description: ''
+  trigger:
+  - platform: time
+    at: '22:00'
+  - platform: time
+    at: '23:00'
+  - platform: time
+    at: '23:55'
+  condition: []
+  action:
+  - device_id: 10f8b4b86ce453ab8df0cca1d57f943b
+    domain: lock
+    entity_id: lock.back_door
+    type: lock
+  mode: single
+- id: '1643031217172'
+  alias: VCV max on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.vcv_maximum
+    to: 'on'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.vcv_minim
+  mode: single
+- id: '1643031351402'
+  alias: VCV min on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.vcv_minim
+    to: 'on'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.vcv_maximum
+  mode: single
+- id: '1643811573035'
+  alias: Charlie's heating
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: '10'
+  condition: []
+  action:
+  - if:
+    - condition: and
+      conditions:
+      - condition: time
+        after: '18:00:00'
+        before: 08:00:00
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+        - sat
+        - sun
+      - condition: numeric_state
+        entity_id: sensor.t_h_sensor_temperature
+        below: 4
+    then:
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.sonoff_100073e06f
+    else:
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.sonoff_100073e06f
+  mode: single
+- id: '1643811689127'
+  alias: Turn off Charlie's heating
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '0'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.sonoff_100073e06f
+  mode: single
+- id: '1643814521015'
+  alias: Garage water leak
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.water_leak_sensor
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.notify
+    data:
+      message: Water detected at garage door
+  - service: notify.mobile_app_sm_g973f
+    data:
+      message: Water detected at garage door
+      data:
+        ttl: 0
+        priority: high
+        channel: alarm_stream
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.d_c03
+      - switch.d_c04
+  mode: single
+- id: '1644934256144'
+  alias: Garage door open
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: 6d963e5b7a46d042f612921a0df14b7e
+    entity_id: binary_sensor.contact_sensor
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.d_c03
+  - delay:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+  - condition: state
+    entity_id: binary_sensor.contact_sensor
+    for:
+      hours: 0
+      minutes: 29
+      seconds: 0
+    state: 'on'
+  - service: notify.notify
+    data:
+      message: Garage door left open for more than 30 minutes
+  - service: notify.mobile_app_sm_g973f
+    data:
+      message: Garage door left open for more than 30 minutes
+      data:
+        ttl: 0
+        priority: high
+        channel: alarm_stream
+  mode: restart
+- id: '1644934449468'
+  alias: Garage door close
+  description: ''
+  trigger:
+  - type: not_opened
+    platform: device
+    device_id: 6d963e5b7a46d042f612921a0df14b7e
+    entity_id: binary_sensor.contact_sensor
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.d_c03
+  mode: single
+- id: '1647188000268'
+  alias: Tablet charging
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:30:00'
+  - platform: time
+    at: 07:30:00
+  condition: []
+  action:
+  - service: switch.toggle
+    data: {}
+    target:
+      entity_id: switch.tasmota
+  mode: single
+- id: '1652076598311'
+  alias: Actuator Master bedroom
+  description: ''
+  trigger:
+  - platform: time
+    at: 06:00
+  condition:
+  - condition: time
+    weekday:
+    - mon
+    - fri
+  action:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.masterroom_temperature
+    data:
+      value: '{{ state_attr(''climate.matrimonial'', ''temperature'') | float }}
+
+        '
+  - service: climate.set_temperature
+    target:
+      entity_id: climate.matrimonial
+    data:
+      temperature: '{{ (state_attr(''climate.matrimonial'', ''current_temperature'')
+        | float + 0.3) }}
+
+        '
+  - delay:
+      hours: 0
+      minutes: 3
+      seconds: 0
+      milliseconds: 0
+  - service: climate.set_temperature
+    target:
+      entity_id: climate.matrimonial
+    data:
+      temperature: '{{ states(''input_number.masterroom_temperature'') | float }}
+
+        '
+  mode: single
+- id: '1661856817126'
+  alias: All Actuators
+  description: ''
+  trigger:
+  - platform: time
+    at: 05:00:00
+  - platform: time
+    at: 05:00:05
+  condition: []
+  action:
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.p_t01_status
+      - switch.actuator_basement
+      - switch.e_t01_status
+  mode: single
+- id: '1662370501071'
+  alias: HVAC temperature
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: /5
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''sensor.hvac_current_temp'') > states(''sensor.hvac_setpoint_temp'')
+          }}'
+      sequence:
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.hvac_increase_temp
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''sensor.hvac_current_temp'') < states(''sensor.hvac_setpoint_temp'')
+          }}'
+      sequence:
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.hvac_decrese_temp
+    default: []
+  mode: single
+- id: '1668524246136'
+  alias: Huawei Solar inverter data polling
+  description: ''
+  trigger:
+  - platform: time_pattern
+    hours: '*'
+    minutes: '*'
+    seconds: /15
+  condition:
+  - condition: sun
+    before: sunset
+    after: sunrise
+  action:
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id:
+      - sensor.power_meter_active_power
+      - sensor.power_meter_phase_a_active_power
+      - sensor.power_meter_phase_b_active_power
+      - sensor.power_meter_phase_c_active_power
+- id: '1669199528089'
+  alias: NFC Tag Toggle door car is scanned
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 50edc245-1b24-467c-91b5-44c010e709eb
+  condition: []
+  action:
+  - service: script.toggle_doors
+    data: {}
+  mode: single
+- id: '1669211300409'
+  alias: Lights left on
+  description: ''
+  trigger:
+  - entity_id:
+    - switch.p_c02
+    - switch.p_c03
+    - switch.p_c05
+    - switch.p_c06
+    - switch.p_c07
+    - switch.p_c08
+    - switch.p_c09
+    - switch.p_c10
+    - switch.p_c11
+    - switch.p_c12
+    - switch.p_c13
+    - switch.p_c14
+    - switch.p_c15
+    - switch.p_c16
+    - switch.p_c17
+    - switch.p_c18
+    - switch.p_c19
+    - switch.p_c20
+    - switch.e_c01
+    - switch.e_c03
+    - switch.e_c04
+    - switch.e_c05
+    - switch.e_c07
+    - switch.e_c08
+    - switch.e_c09
+    - switch.e_c10
+    - switch.e_c11
+    - switch.e_c12
+    - switch.e_c13
+    - switch.e_c15
+    - switch.e_c16
+    - switch.e_c18
+    - switch.e_c19
+    - switch.e_c20
+    for:
+      hours: 2
+      minutes: 0
+      seconds: 0
+    platform: state
+    to: 'on'
+  - entity_id:
+    - switch.d_c01
+    - switch.d_c02
+    - switch.d_c03
+    - switch.d_c04
+    - switch.d_c05
+    - switch.d_c06
+    - switch.d_c08
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - alias: Set up variables for the actions
+    variables:
+      action_accept: '{{ ''ACCEPT_'' ~ context.id }}'
+      action_decline: '{{ ''DECLINE_'' ~ context.id }}'
+  - alias: Ask to turn off the lights
+    service: notify.mobile_app_sm_g973f
+    data:
+      message: "\U0001F4A1{{ trigger.to_state.name }} is ON for more than 2 hour.
+        Do you want to turn it off?"
+      data:
+        actions:
+        - action: '{{ action_accept }}'
+          title: 'Yes'
+        - action: '{{ action_decline }}'
+          title: 'No'
+  - alias: Wait for a response to turn off the lights
+    wait_for_trigger:
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: '{{ action_accept }}'
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: '{{ action_decline }}'
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: false
+  - alias: Perform the action
+    choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ wait.trigger.event.data.action == action_accept }}'
+      sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: '{{ trigger.entity_id }}'
+        data: {}
+    default: []
+  mode: restart
+- id: '1669216165035'
+  alias: Lg washer finished cycle
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.front_load_washer_wash_completed
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.notify
+    data:
+      title: LG Washer finished
+      message: Intinde rufele!
+  mode: single
+- id: '1669646117937'
+  alias: Overpower
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.sonoff_10013b1517_power_2
+    above: 680
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 3
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.sonoff_100073e06f
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - if:
+    - condition: numeric_state
+      entity_id: sensor.sonoff_10013b1517_power_2
+      above: 600
+    then:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.e_c06
+        - light.e_c02
+        - light.matrimonial
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.e_c15
+  - service: notify.mobile_app_sm_g973f
+    data:
+      title: Overpower
+      message: Power consumption on UPS is more than 600w
+  mode: single
+- id: '1669647516757'
+  alias: No power
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.sonoff_10009ed5e2_voltage
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+    below: 100
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.sonoff_100073e06f
+      - switch.e_c15
+      - switch.p_c06
+      - switch.p_c05
+      - switch.p_c14
+      - switch.p_c03
+      - switch.p_c13
+  - service: notify.mobile_app_sm_g973f
+    data:
+      title: No power
+      message: "There is no power \U0001F50B⚡️"
+  mode: single
+- id: '1669709681500'
+  alias: NFC Tag Stairs is scanned
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 63c26006-c288-45e5-86d7-de62622e43aa
+  condition: []
+  action:
+  - service: script.turn_off_ground_floor_lights
+    data: {}
+  - service: script.turn_off_basement_lights
+    data: {}
+  mode: single
+- id: '1669734959267'
+  alias: NFC Tag Home away car is scanned
+  description: ''
+  trigger:
+  - platform: tag
+    tag_id: 66814b14-484e-49e4-8c41-aa31216834d7
+  condition: []
+  action:
+  - service: script.home_away
+    data: {}
+  mode: single
+- id: '1670785753965'
+  alias: Back room increase temperature
+  description: ''
+  trigger:
+  - platform: time
+    at: '11:00:00'
+  condition:
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    enabled: true
+  action:
+  - service: input_number.set_value
+    data:
+      value: '{{ state_attr(''climate.dormitor_spate'', ''temperature'') | float }}
+
+        '
+    target:
+      entity_id: input_number.back_room_temperature
+  - service: climate.set_temperature
+    data:
+      temperature: '{{ state_attr(''climate.dormitor_spate'', ''temperature'') | float
+        + 0.3}}
+
+        '
+    target:
+      entity_id: climate.dormitor_spate
+  - delay:
+      hours: 3
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - service: climate.set_temperature
+    data:
+      temperature: '{{ states(''input_number.back_room_temperature'') | float }}
+
+        '
+    target:
+      entity_id: climate.dormitor_spate
+  mode: single
