@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Setup new Rainbird controller",
+        "data": {
+          "host": "Host name of Rainbird controller",
+          "password": "Password for controller",
+          "number_of_stations": "Number of irrigation circuits (if 0 or missing, circuits will be automatically detected",
+          "monitored_conditions": "Active sensors",
+          "trigger_time": "default irrigation time",
+          "scan_interval": "Sensor update period"
+        }
+      }
+    },
+    "error": {
+      "host": "Host must be provided!"
+    },
+    "abort": {
+      "single_instance_allowed": "There is just single instance allowed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Setup Rainbird controller at {host}",
+        "data": {
+          "password": "Password for controller",
+          "number_of_stations": "Number of irrigation circuits (if 0, circuits will be automatically detected",
+          "monitored_conditions": "Active sensors",
+          "trigger_time": "default irrigation time",
+          "scan_interval": "Sensor update period"
+        }
+      }
+    }
+  }
+}

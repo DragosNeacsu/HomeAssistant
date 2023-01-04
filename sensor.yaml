@@ -1,0 +1,113 @@
+- platform: template
+  sensors:
+     washer_door_lock:
+       friendly_name: "Washer Door Lock"
+       value_template: "{{ state_attr('sensor.washer','door_lock') }}"
+
+     mini_washer_door_lock:
+       friendly_name: "Mini Washer Door Lock"
+       value_template: "{{ state_attr('sensor.mini_washer','door_lock') }}"
+
+     dishwasher_door_open:
+       friendly_name: "Dish Washer Door Lock"
+       value_template: "{{ state_attr('sensor.dishwasher','door_open') }}"
+
+     washer_time_display:
+       friendly_name: "Washer Time Display"
+       value_template: >
+         {% if is_state('sensor.washer_run_state', '-') %}
+         {% elif is_state('sensor.washer_run_state', 'Standby') %}
+           -:--
+         {% else %}
+           {{ state_attr('sensor.washer', 'remain_time') }}
+         {% endif %}
+ 
+     mini_washer_time_display:
+       friendly_name: "Mini Washer Time Display"
+       value_template: >
+         {% if is_state('sensor.mini_washer_run_state', '-') %}
+         {% elif is_state('sensor.mini_washer_run_state', 'Standby') %}
+           -:--
+         {% else %}
+           {{ state_attr('sensor.mini_washer', 'remain_time') }}
+         {% endif %}
+     
+     dryer_time_display:
+       friendly_name: "Dryer Time Display"
+       value_template: >
+          {% if is_state('sensor.dryer_run_state', '-') %}
+          {% elif is_state('sensor.dryer_run_state', 'Standby') %}
+            -:--
+          {% else %}
+            {{ state_attr('sensor.dryer', 'remain_time') }}
+          {% endif %}
+     dishwasher_time_display:
+       friendly_name: "Dish Washer Time Display"
+       value_template: >
+         {% if is_state('sensor.dishwasher_run_state', '-') %}
+         {% elif is_state('sensor.dishwasher_run_state', 'Standby') %}
+           -:--
+         {% else %}
+           {{ state_attr('sensor.dishwasher', 'remain_time') }}
+         {% endif %}
+     front_load_washer_remaining_time_formatted:
+       friendly_name: "Washer remaning time formated"
+       value_template: "{{ states('sensor.front_load_washer_remaining_time')[:-3]}}"
+     blank:
+       friendly_name: "Blank Sensor"
+       value_template: ""
+
+- platform: statistics
+  name: 'Average HVAC power'
+  entity_id: sensor.sonoff_10009ed5e2_power
+  state_characteristic: mean
+  sampling_size: 2000
+  unique_id: sensor.statistics.hvac_average_power_60min
+
+- platform: history_stats
+  name: Heating ON today
+  entity_id: switch.all_actuators
+  state: 'on'
+  type: time
+  end: '{{ now().replace(hour=0, minute=0, second=0) }}'
+  duration:
+   hours: 24
+        
+- platform: command_line
+  name: hvac state
+  scan_interval: 5
+  command: "curl http://192.168.1.30/readValues --http0.9"
+  value_template: "{{ value.split('PLATE BOX95-2 600-P')[0] }}"
+- platform: template
+  sensors:
+     vw_100range:
+        unit_of_measurement: 'km'
+        value_template: "{{(states('sensor.id_3_pro_performance_range')| int/states('sensor.volkswagen_id_id_3_pro_performance_state_of_charge')| int*100) |round }}"
+     vw_plug_state:
+        friendly_name: "Washer Time Display"
+        value_template: >
+         {% if is_state('sensor.id_3_pro_performance_plug_connection_state', 'connected') %}
+          {% if is_state('sensor.volkswagen_id_id_3_pro_performance_charging_state', 'readyForCharging') %}
+            Ready
+          {% elif is_state('sensor.volkswagen_id_id_3_pro_performance_charging_state', 'charging') %}
+            Charging
+          {% else %}
+            Unavalilable
+          {% endif %}
+         {% else %}
+           Unplugged
+         {% endif %}
+     hvac_actual_state:
+       value_template: "{{ states('sensor.hvac_state').split('|$|')[13].lower() }}"
+     hvac_actual_flow:
+       value_template: "{{ states('sensor.hvac_state').split('|$|')[1] | default(0) | int(0) }}"
+       unit_of_measurement: "m3h"
+     hvac_current_flow:
+       value_template: "{{ states('sensor.hvac_state').split('|$|')[4] | default(0) | int(0) }}"
+       unit_of_measurement: "m3h"
+     hvac_current_temp:
+       value_template: "{{ states('sensor.hvac_state').split('|$|')[8] | default(0) | int(0) }}"
+       unit_of_measurement: '°C'
+     hvac_setpoint_temp:
+       value_template: "{{ states('sensor.hvac_state').split('|$|')[11] | default(0) | int(0) }}"
+       unit_of_measurement: '°C'

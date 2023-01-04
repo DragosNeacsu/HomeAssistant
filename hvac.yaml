@@ -1,0 +1,51 @@
+switch:
+ - platform: command_line
+   scan_interval: 1
+   switches:
+      hvac:
+        friendly_name: HVAC onoff
+        command_on: "curl http://192.168.1.30/setLED?LEDstate=19471 --http0.9"
+        command_off: "curl http://192.168.1.30/setLED?LEDstate=09471 --http0.9"
+        command_state: "curl http://192.168.1.30/readValues --http0.9"
+        value_template: "{{ value.split('|$|')[13].lower()=='on' }}"
+      hvac_increase_fan:
+        command_on: "curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9"
+        command_off: "curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9"
+        command_state: "false"
+      hvac_decrese_fan:
+        command_on: "curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9"
+        command_off: "curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9"
+        command_state: "false"
+      hvac_increase_temp:
+        command_on: "curl http://192.168.1.30/setTemp?TEMPState=19471 --http0.9"
+        command_off: "curl http://192.168.1.30/setTemp?TEMPState=19471 --http0.9"
+        command_state: "false"
+      hvac_decrese_temp:
+        command_on: "curl http://192.168.1.30/setTemp?TEMPState=09471 --http0.9"
+        command_off: "curl http://192.168.1.30/setTemp?TEMPState=09471 --http0.9"
+        command_state: "false"
+      hvac_boost:
+        command_on: >-
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9 &&
+             curl http://192.168.1.30/setFlow?FLOWState=19471 --http0.9
+        command_off: >-
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9 &&
+              curl http://192.168.1.30/setFlow?FLOWState=09471 --http0.9
+        command_state: "true"
+        value_template: "{{states('sensor.hvac_current_flow') | int(0) > 700}}"

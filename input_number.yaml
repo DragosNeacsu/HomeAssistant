@@ -1,0 +1,14 @@
+basement_temperature: 
+    initial: 20
+    min: 15
+    max: 35
+    
+living_temperature: 
+    initial: 21
+    min: 15
+    max: 35
+    
+masterroom_temperature: 
+    initial: 21
+    min: 15
+    max: 35

@@ -1,0 +1,9 @@
+CentralHeating:
+ name: Central Heating
+ entities:
+ - switch.actuator_basement
+ - switch.p_t01_status
+ - switch.p_t02_status
+ - switch.e_t01_status
+ - switch.e_t02_status
+ - switch.e_t03_status

@@ -1,0 +1,1 @@
+// document.documentElement.style.setProperty('--ha-card-header-font-size', '10px');

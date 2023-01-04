@@ -1,0 +1,93 @@
+name: Bug report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+
+      
+- type: textarea
+  attributes:
+    label: "Describe the issue"
+    description: "A clear and concise description of what the issue is."
+  validations:
+    required: true      
+
+- type: textarea
+  attributes:
+    label: "Bescribe your Huawei Solar Setup"
+    description: "Please be thorough when describing your setup"
+    value: |
+      Inverter Type:
+      Inverter Firmware version:
+      SDongle present: yes / no
+      Power meter present: three phase / single phase / no
+      Battery: LG RESU xxkWh / LUNA2000 xxkWh / None
+      Battery Firmware version:
+  validations:
+    required: true
+
+- type: dropdown
+  id: connection_method
+  attributes:
+    label: How do you connect to the inverter?
+    options:
+      - Over serial, with a serial-to-USB stick
+      - Over serial, with a serial-to-WiFi stick
+      - Via the `SUN2000-<serial_no>` WiFi 
+      - Via the SDongle, wireless connection
+      - Via the SDongle, wired connection
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: "Upload your Diagnostics File"
+    description: |
+      1. In your Home Assistant, go to Settings > Devices & Services
+      2. Click the three dots on the 'Huawei Solar' tile 
+      3. Select 'Download diagnostis'
+      4. Click on the textarea below, drag & drop the file into the textarea to upload it.
+    value: Drag & Drop your Diagnostics File here.
+  validations:
+    required: true
+
+- type: markdown
+  attributes:
+    value: |
+      ## Relevant debug logs
+      
+      **You MUST include relevant logfiles to debug your issue.**
+
+      For instance: if the integration does not show up in the `+ Add Integration` list, then add any relevant lines you can find in `/config/home-assistant.log` after a full restart of your Home Assistant instance.
+
+      When you don't find any relevant logs, please increase your logging level and try again. To do this, add the following lines to your `/config/configuration.yaml` and restart HA:
+
+      ```yaml
+      logger:
+        default: debug
+        logs:
+          custom_components.huawei_solar: debug
+          huawei_solar: debug
+          pymodbus: debug # only include this if you're having connectivity issues
+      ```
+      
+      Make sure to check for relevant log lines in the **Full logs**, which you can also find in `/config/home-assistant.log`. Do NOT copy&paste info from the summary that you see when going to `System → Logs`, always push the "Load Full Logs" button and look there.
+
+- type: textarea
+  attributes:
+    label: Upload your relevant debug logs
+    render: text
+  validations:
+    required: true
+ 
+- type: checkboxes
+  id: checks
+  attributes:
+    label: "Please confirm the following:"
+    options:
+      - label: I did not find an existing issue describing this problem.
+      - label: I did upload the diagnostics-file that I could retrieve from  the 'Devices & Services Page'
+      - label: I increased the logging configuration, restarted HA, and have copied all relevant log lines from the 'Full Logs' into the textarea.
+    
+    
+    
